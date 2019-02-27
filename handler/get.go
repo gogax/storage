@@ -15,6 +15,7 @@ func Get(db *repository.Storage) http.Handler {
 			respondWithError(w, http.StatusBadRequest, "request key not specified")
 			return
 		}
+		defer r.Body.Close()
 		value, err := db.Get(key)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, "can't get cell by key")

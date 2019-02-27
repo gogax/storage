@@ -1,30 +1,32 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
-	"strconv"
 	"test/repository"
 )
 
 func Set(db *repository.Storage) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var cell repository.Cell
+		json.NewDecoder(r.Body).Decode(&cell)
+
 		key := r.URL.Query().Get("key")
-		value := r.URL.Query().Get("value")
-		time, timeErr := strconv.ParseInt(r.URL.Query().Get("time"), 10, 64)
 		if key == "" {
 			respondWithError(w, http.StatusBadRequest, "request key not specified")
 			return
 		}
-		if value == "" {
+		if cell.Value == "" {
 			respondWithError(w, http.StatusBadRequest, "request value not specified")
 			return
 		}
-		if timeErr != nil {
+		if cell.TimeLife == 0 {
 			respondWithError(w, http.StatusBadRequest, "request time not specified")
 			return
 		}
-		//Expiration - key lifetime
-		db.Set(key, value, time)
+		defer r.Body.Close()
+		//db.Set(key, value, time)
+		db.Set(key, cell.Value, cell.TimeLife)
 		respondwithJSON(w, http.StatusCreated, map[string]string{"message": "successfully created"})
 	})
 }

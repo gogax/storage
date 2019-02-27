@@ -12,6 +12,7 @@ func Delete(db *repository.Storage) http.Handler {
 			respondWithError(w, http.StatusBadRequest, "request key not specified")
 			return
 		}
+		defer r.Body.Close()
 		err := db.Delete(key)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, "can't delete cell")
